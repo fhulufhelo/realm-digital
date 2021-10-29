@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\BirthdayWish;
-use App\Models\Employee;
-use App\Notify\EmployeeWithEmail;
+use App\Notifications\BirthDayWish;
 use App\Repositories\EmployeesRepository;
 use Illuminate\Console\Command;
 
@@ -39,22 +37,15 @@ class SendBirthDayWishEmails extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(EmployeesRepository $repository)
     {
-        $employeesRepository = new EmployeesRepository();
-        $employees = $employeesRepository->get();
+        $employees = $repository->get();
 
         foreach ($employees as $employee) {
             if ($employee->shouldReceiveBirthdayWish()) {
-                (new EmployeeWithEmail($employee,$this->message($employee) ))->send();
+                $employee->notify(new BirthDayWish($employee));
             }
         }
     }
-
-    public function message(Employee $employee)
-    {
-        return "Happy Birthday " . $employee->name . " We wish you all the best";
-    }
-
 
 }

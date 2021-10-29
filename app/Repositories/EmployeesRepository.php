@@ -9,19 +9,27 @@ class EmployeesRepository
 {
     protected $api = 'https://interview-assessment-1.realmdigital.co.za';
     protected $getEndpoint = 'employees';
-    public function get()
+    protected $data;
+
+    public function __construct()
     {
+        $this->fill();
+    }
+
+    public function collection()
+    {
+        return $this->data;
+    }
+
+    protected function fill()
+    {
+        $this->data = collect();
+
         $request = new ApiRequest($this->api);
 
-        $results = $request->get($this->getEndpoint);
-
-        $employees = collect();
-
-        foreach ($results as $employee) {
-            $employees->add(new Employee($employee));
+        foreach ($request->get($this->getEndpoint) as $employee) {
+            $this->data->add(new Employee($employee));
         }
-
-        return $employees;
     }
 
 }
